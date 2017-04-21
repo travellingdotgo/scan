@@ -1,0 +1,42 @@
+apply plugin: 'com.android.application'
+
+android {
+    compileSdkVersion 23
+    buildToolsVersion "23.0.2"
+
+    defaultConfig {
+        applicationId "com.megvii.koalacamonline"
+        minSdkVersion 19
+        targetSdkVersion 23
+    }
+
+    signingConfigs {
+        release {
+            keyAlias 'xierapp'
+            keyPassword 'xierandroid123'
+            storeFile file('release.jks')
+            storePassword 'xierandroid123'
+        }
+    }
+
+    buildTypes {
+        release {
+            signingConfig signingConfigs.release
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
+        }
+    }
+}
+
+dependencies {
+    compile(name: 'megface-android', ext: 'aar')
+    compile 'com.android.support:support-v4:23.0.1'
+    compile files('libs/android-async-http-1.4.6.jar')
+    compile files('libs/facequality_v1.0.1.jar')
+    compile files('libs/universal-image-loader-1.9.2-SNAPSHOT-with-sources.jar')
+    compile files('libs/LiveDetect.jar')
+
+
+
+    compile 'org.greenrobot:eventbus:3.0.0'
+}
