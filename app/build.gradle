@@ -36,7 +36,6 @@ dependencies {
     compile files('libs/universal-image-loader-1.9.2-SNAPSHOT-with-sources.jar')
     compile files('libs/LiveDetect.jar')
 
-
-
     compile 'org.greenrobot:eventbus:3.0.0'
+    compile("com.bewant2be.doit:utilslib:1.0.49:release@aar")
 }

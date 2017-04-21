@@ -11,8 +11,11 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.SurfaceView;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.bewant2be.doit.utilslib.DisplayUtil;
+import com.bewant2be.doit.utilslib.ToastUtil;
 import com.megvii.bean.FaceInfo;
 import com.megvii.bean.MGGrayscaleImage;
 import com.megvii.bean.MGYUVImage;
@@ -36,28 +39,26 @@ import megvii.megfaceandroid.MegfaceFloatPoint;
 import megvii.megfaceandroid.MegfaceLandmark;
 import megvii.megfaceandroid.MegfaceModel;
 
+import  com.bewant2be.doit.utilslib.CameraView;
+
 public class ScanActivity extends Activity {
 
 	public final static String TAG = "ScanActivity";
 	public final static int THRESHHOLD = 0x1E;// suitable for 720p
 	//public final static int THRESHHOLD = 0x3C;// suitable for 2688*1512
 
-	private SurfaceView mSurfaceView1;
-	private SufaceCameraManager mCameraManager1;
+	private CameraView cameraView1;
 	private Camera mCamera1 = null;
 
 
-	private SurfaceView mSurfaceView2;
-	private SufaceCameraManager mCameraManager2;
+	private CameraView cameraView2;
 	private Camera mCamera2 = null;
 
 	private DetectionManager mDetectionManager1;
 	private DetectionManager mDetectionManager2;
 
-	MyView myView1;
-	MyView myView2;
-
 	TextView textView;
+	private int display_degree;
 
 	FaceDetector faceDetector = null;
 	FaceLiveDetect faceLiveDetect = null;
@@ -80,7 +81,6 @@ public class ScanActivity extends Activity {
 			Log.e(TAG, "face_size: " + face_size);
 
 			Status.bFaceDetected1 = false;
-			findViewById(R.id.myview1).invalidate();
 
 			if (stillTrackingTracks != null && stillTrackingTracks.size() > 0) {
 				final Track track = stillTrackingTracks.get(0);
@@ -133,7 +133,6 @@ public class ScanActivity extends Activity {
 						Log.e(TAG, "bFaceDetected = true");
 						Status.bFaceDetected1 = true;
 						Status.rectF1 = position;
-						findViewById(R.id.myview1).invalidate();
 					} else {
 						Log.e(TAG, "No Track");
 					}
@@ -157,7 +156,6 @@ public class ScanActivity extends Activity {
 			Log.e(TAG, "face_size2: " + face_size);
 
 			Status.bFaceDetected2 = false;
-			findViewById(R.id.myview2).invalidate();
 
 			if(face_size >=1){
 				// ..... statistic begin....
@@ -224,7 +222,6 @@ public class ScanActivity extends Activity {
 						Log.e(TAG, "bFaceDetected = true");
 						Status.bFaceDetected2 = true;
 						Status.rectF2 = position;
-						findViewById(R.id.myview2).invalidate();
 					} else {
 						Log.e(TAG, "No Track");
 					}
@@ -240,6 +237,13 @@ public class ScanActivity extends Activity {
 	Camera.PreviewCallback previewCallback1 = new Camera.PreviewCallback(){
 		@Override
 		public void onPreviewFrame(final byte[] data, Camera camera) {
+
+			boolean b = true;
+			if(b){
+				camera.addCallbackBuffer(data);
+				return;
+			}
+
 			final int width = Status.previewWidth;
 			final int height = Status.previewHeight;
 
@@ -381,6 +385,12 @@ public class ScanActivity extends Activity {
 	Camera.PreviewCallback previewCallback2 = new Camera.PreviewCallback(){
 		@Override
 		public void onPreviewFrame(byte[] data, Camera camera) {
+			boolean b = true;
+			if(b){
+				camera.addCallbackBuffer(data);
+				return;
+			}
+
 			int width = Status.previewWidth;
 			int height = Status.previewHeight;
 
@@ -395,14 +405,9 @@ public class ScanActivity extends Activity {
 			}
 
 			if(Status.bNeedFaceDetection){
-				Log.e(TAG, "mCameraManager.cameraWidth, mCameraManager.cameraHeight mCameraManager.mDetectionAngle: "
-						+ mCameraManager2.cameraWidth + "  "
-						+ mCameraManager2.cameraHeight + "  "
-						+ mCameraManager2.mDetectionAngle + "  "
-						+ data.length + "  " );
 				mDetectionManager2.postDetection(new MGYUVImage(data,
-						mCameraManager2.cameraWidth, mCameraManager2.cameraHeight,
-						mCameraManager2.mDetectionAngle));
+						width, height,
+						0));
 			}
 
 			// ..... statistic end....
@@ -418,23 +423,24 @@ public class ScanActivity extends Activity {
 		super.onCreate(savedInstanceState);
 		Screen.initialize(this);
 		setContentView(R.layout.scan_layout);
+		display_degree = DisplayUtil.getRotation(this);
+
+
+		LinearLayout linearLayout = (LinearLayout)findViewById(R.id.ll_surfaces);
+		if(display_degree % 180==0){
+			linearLayout.setOrientation(LinearLayout.VERTICAL);
+		}else{
+			linearLayout.setOrientation(LinearLayout.HORIZONTAL);
+		}
+
+
+
+		ToastUtil.toastComptible(getApplicationContext(), "display_degree=" + display_degree);
+		Log.i(TAG, "display_degree = " + display_degree);
 
 		EventBus.getDefault().register(this);
 
-		imageView = (ImageView)findViewById(R.id.imageView);
-		imageView.setImageResource(R.drawable.main_back);
-
-		myView1 = (MyView)findViewById(R.id.myview1);
-		myView2 = (MyView)findViewById(R.id.myview2);
-
-
-		myView1.setCamId(1);
-		myView2.setCamId(2);
-
-		textView = (TextView)findViewById(R.id.textView);
-
 		init();
-		ImageNativeWrapper.init(Status.previewWidth, Status.previewHeight, THRESHHOLD);
 
 		System.loadLibrary("megface-android");
 		AssetManager mgr = getApplicationContext().getAssets();
@@ -483,34 +489,17 @@ public class ScanActivity extends Activity {
 		float maxBrightness = fConfig.maxBrightness;
 		float minBrightness = fConfig.minBrightness;
 
-		mSurfaceView1 = (SurfaceView) findViewById(R.id.scan_layout_suface1);
-		mSurfaceView1.setKeepScreenOn(true);
-		mCameraManager1 = new SufaceCameraManager(this, previewCallback1, mSurfaceView1, true);
+		cameraView1 = (CameraView) findViewById(R.id.cameraView1);
+		cameraView1.init(CameraView.FRONT_CAMERA, display_degree, previewCallback1);
 
-		mSurfaceView2 = (SurfaceView) findViewById(R.id.scan_layout_suface2);
-		mCameraManager2 = new SufaceCameraManager(this, previewCallback2, mSurfaceView2, false);
+		cameraView2 = (CameraView) findViewById(R.id.cameraView2);
+		cameraView2.init(CameraView.BACK_CAMERA, display_degree, previewCallback2);
 	}
 
 	@Override
 	protected void onResume() {
 		super.onResume();
 
-		if (!isDetectorTimeOut) {
-			mCamera1 = mCameraManager1.openCamera();
-
-			if (mCamera1 == null) {
-				Log.e(TAG,"打开像机失败1111");
-			}else{
-			}
-
-
-			mCamera2 = mCameraManager2.openCamera();
-
-			if (mCamera2 == null) {
-				Log.e(TAG,"打开像机失败222");
-			}else{
-			}
-		}
 	}
 
 	// ..... statistic begin....
@@ -523,12 +512,6 @@ public class ScanActivity extends Activity {
 	@Override
 	protected void onPause() {
 		super.onPause();
-		if (mCameraManager1 != null) {
-			mCameraManager1.closeCamera();
-		}
-		if (mCameraManager2 != null) {
-			mCameraManager2.closeCamera();
-		}
 	}
 
 	private boolean isDetected = true;

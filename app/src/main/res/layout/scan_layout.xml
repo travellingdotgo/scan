@@ -1,73 +1,34 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:bewant2be="http://schemas.android.com/apk/lib/com.bewant2be.doit"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="#FFFFFF">
+    android:layout_height="match_parent">
 
 
     <LinearLayout
+        android:id="@+id/ll_surfaces"
         android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="match_parent" >
-        <RelativeLayout
-            android:orientation="vertical"
-            android:layout_width="match_parent"
-            android:layout_height="700dp" >
-            <SurfaceView
-                android:id="@+id/scan_layout_suface1"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent" />
-
-            <com.scandemo.MyView
-                android:id="@+id/myview1"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent" />
-        </RelativeLayout>
-        <RelativeLayout
-            android:orientation="vertical"
-            android:layout_width="match_parent"
-            android:layout_height="700dp" >
-            <SurfaceView
-                android:id="@+id/scan_layout_suface2"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent" />
-
-            <com.scandemo.MyView
-                android:id="@+id/myview2"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent" />
-        </RelativeLayout>
-    </LinearLayout>
-
-    <TextView
-        android:id="@+id/textView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
-
-    <LinearLayout
-        android:layout_alignParentBottom="true"
-        android:orientation="vertical"
-        android:layout_width="match_parent"
-        android:visibility="gone"
-        android:layout_height="700dp" >
-
-        <ImageView
-            android:id="@+id/imageView"
-            android:layout_width="match_parent"
+        <com.bewant2be.doit.utilslib.CameraView
+            android:id="@+id/cameraView1"
+            bewant2be:prevwidth="1920"
+            bewant2be:prevheight="1080"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
 
-        <ToggleButton
-            android:id="@+id/toggleButton"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:textOn="开"
-            android:textOff="关" />
-        <ImageView
-            android:id="@+id/imageView1"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:src="@drawable/off" />
-    </LinearLayout>
+        <TextView
+            android:id="@+id/tv_meg"
+            android:layout_width="3dp"
+            android:layout_height="3dp" />
 
+        <!--  -->
+        <com.bewant2be.doit.utilslib.CameraView
+            android:id="@+id/cameraView2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+    </LinearLayout>
 
 </RelativeLayout>
